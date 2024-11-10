@@ -1,103 +1,122 @@
-import java.util.*;
+package labs.lab_8;
 
-class EvenIDAgeLessThan30 extends Exception {
-    EvenIDAgeLessThan30(String message) {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+
+// User-defined exceptions
+class EvenIDAgeLessThan30Exception extends Exception {
+    EvenIDAgeLessThan30Exception(String message) {
         super(message);
     }
 }
 
-class OddIDAgeMoreThan30 extends Exception {
-    OddIDAgeMoreThan30(String message) {
+class OddIDAgeMoreThan30Exception extends Exception {
+    OddIDAgeMoreThan30Exception(String message) {
         super(message);
     }
 }
 
-class party {
+class Party {
 
-    // Make ArrayLists static to persist across all instances
-    static ArrayList<Integer> hall1ages = new ArrayList<>();
-    static ArrayList<Integer> hall2ages = new ArrayList<>();
-    static ArrayList<Integer> hall3ages = new ArrayList<>();
-    
-    int emp_id;
+    // Static lists to store employee ages for each hall
+    static List<Integer> hall1Ages = new ArrayList<>();
+    static List<Integer> hall2Ages = new ArrayList<>();
+    static List<Integer> hall3Ages = new ArrayList<>();
+
+    int empId;
     int age;
 
-    party(int emp_id, int age) {
-        this.emp_id = emp_id;
+    // Constructor to initialize employee details
+    Party(int empId, int age) {
+        this.empId = empId;
         this.age = age;
     }
 
-    void allotHall() throws EvenIDAgeLessThan30, OddIDAgeMoreThan30 {
-        if ((emp_id % 2 == 0) && (age < 30)) {
-            System.out.println("Welcome to party hall 1!");
-            hall1ages.add(age);
-        } else if ((emp_id % 2 != 0) && (age > 30)) {
-            System.out.println("Welcome to party hall 2!");
-            hall2ages.add(age);
+    // Method to allot employees to their respective halls
+    void allotHall() throws EvenIDAgeLessThan30Exception, OddIDAgeMoreThan30Exception {
+        if (empId % 2 == 0 && age < 30) {
+            // Throw exception if employee with even ID and age < 30
+            throw new EvenIDAgeLessThan30Exception("You are not allowed in hall 2 or hall 3");
+        } else if (empId % 2 != 0 && age > 30) {
+            // Throw exception if employee with odd ID and age > 30
+            throw new OddIDAgeMoreThan30Exception("You are not allowed in hall 1 or hall 3");
+        } else if (empId % 2 == 0) {
+            // Allot to hall 1
+            System.out.println("Welcome to the party in Hall 1!");
+            hall1Ages.add(age);
+        } else if (empId % 2 != 0) {
+            // Allot to hall 2
+            System.out.println("Welcome to the party in Hall 2!");
+            hall2Ages.add(age);
         } else {
-            System.out.println("Welcome to party hall 3!");
-            hall3ages.add(age);
+            // Allot to hall 3 (for remaining cases)
+            System.out.println("Welcome to the party in Hall 3!");
+            hall3Ages.add(age);
         }
     }
 
-    void findaverage() {
-        if (hall1ages.isEmpty()) {
-            System.out.println("Hall 1: No employees");
-        } else {
-            double hall1avg = 0;
-            for (Integer age : hall1ages) {
-                hall1avg += age;
-            }
-            System.out.println("Hall 1 average age: " + hall1avg / hall1ages.size());
+    // Method to find and print average ages for all halls
+    void findAverages() {
+        try {
+            System.out.println("Hall 1 average age: " + calculateAverage(hall1Ages));
+            System.out.println("Hall 2 average age: " + calculateAverage(hall2Ages));
+            System.out.println("Hall 3 average age: " + calculateAverage(hall3Ages));
+        } catch (Exception e) {
+            System.out.println("An error occurred while calculating averages: " + e.getMessage());
         }
+    }
 
-        if (hall2ages.isEmpty()) {
-            System.out.println("Hall 2: No employees");
-        } else {
-            double hall2avg = 0;
-            for (Integer age : hall2ages) {
-                hall2avg += age;
-            }
-            System.out.println("Hall 2 average age: " + hall2avg / hall2ages.size());
+    // Helper method to calculate the average age of a hall
+    private double calculateAverage(List<Integer> ages) {
+        if (ages.isEmpty()) {
+            return 0.0;
         }
-
-        if (hall3ages.isEmpty()) {
-            System.out.println("Hall 3: No employees");
-        } else {
-            double hall3avg = 0;
-            for (Integer age : hall3ages) {
-                hall3avg += age;
-            }
-            System.out.println("Hall 3 average age: " + hall3avg / hall3ages.size());
+        int sum = 0;
+        for (int age : ages) {
+            sum += age;
         }
+        return (double) sum / ages.size();
     }
 }
 
 public class q1 {
-    public static void main(String[] args) throws EvenIDAgeLessThan30, OddIDAgeMoreThan30 {
-
+    public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        boolean addemployee = true;
+        boolean addEmployee = true;
 
-        while (addemployee) {
+        while (addEmployee) {
             try {
-                System.out.println("Enter your Id:");
-                int emp_id = input.nextInt();
-                System.out.println("Enter your age:");
+                System.out.print("Enter Employee ID: ");
+                int empId = input.nextInt();
+
+                System.out.print("Enter Employee Age: ");
                 int age = input.nextInt();
 
-                party p = new party(emp_id, age);
+                // Create a Party object and allot the employee to a hall
+                Party p = new Party(empId, age);
                 p.allotHall();
-                p.findaverage();
 
-                System.out.println("Do you want to add another employee? (yes/no)");
-                String answer = input.next();
-                addemployee = answer.equalsIgnoreCase("yes");
-            } catch (EvenIDAgeLessThan30 | OddIDAgeMoreThan30 e) {
+                // Print the average ages of all halls
+                p.findAverages();
+
+            } catch (EvenIDAgeLessThan30Exception | OddIDAgeMoreThan30Exception e) {
+                // Catch user-defined exceptions and print the message
                 System.out.println("Exception: " + e.getMessage());
+            } catch (InputMismatchException e) {
+                // Handle invalid input
+                System.out.println("Invalid input. Please enter a valid number.");
+                input.next(); // Clear the invalid input
             } catch (Exception e) {
-                System.out.println("Unexpected Exception has occurred");
+                // Handle any other unexpected exceptions
+                System.out.println("An unexpected error occurred: " + e.getMessage());
             }
+
+            System.out.print("Do you want to add another employee? (yes/no): ");
+            String answer = input.next();
+            addEmployee = answer.equalsIgnoreCase("yes");
         }
 
         input.close();
